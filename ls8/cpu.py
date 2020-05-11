@@ -6,9 +6,11 @@ class CPU:
     """Main CPU class."""
 
     def __init__(self):
-        """Construct a new CPU."""
-        pass
-
+        # program that saves and prints numbers from registers
+        self.reg = [0] * 8  
+        self.pc = 0 
+        self.ram = [0] * 256  
+        
     def load(self):
         """Load a program into memory."""
 
@@ -25,12 +27,14 @@ class CPU:
             0b00000000,
             0b00000001, # HLT
         ]
-
         for instruction in program:
             self.ram[address] = instruction
             address += 1
 
-
+    def ram_read(self, address):
+        return self.ram[address]
+    def ram_write(self, address, instruction):
+        self.ram[address] = instruction
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
@@ -62,4 +66,25 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        running = True
+        while running:
+            # lets receive some instructions, and execute them
+            command = self.ram[self.pc]
+            # if command is LDI
+            if command == 0b10000010:
+                R0 = self.ram[self.pc+1]
+                num_LDI = self.ram[self.pc+2]
+                self.reg[R0] = num_LDI
+                self.pc += 3
+            # if command is PRN
+            elif command == 0b01000111:
+                # look at the next line in memory
+                # print the number thats in that spot
+                num_LDI = self.reg[self.ram[self.pc + 1]]
+                print(num_LDI)
+                self.pc += 2
+            # if command is HLT
+            elif command == 0b00000001:
+                running = False
+                self.pc = 0
+                # shutdown

@@ -15,18 +15,31 @@ class CPU:
         """Load a program into memory."""
 
         address = 0
+        print('see how many args passed', sys.argv)
+        if len(sys.argv) != 2:
+            print("Need file name with the extention .ls8 passed")
+            sys.exit(1)
 
         # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        program = []
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
+        filename = sys.argv[1]
+        filepath = "examples/" + filename
+        with open(filepath) as f:
+            for line in f:
+                if line == '\n' or line[0]== '#':
+                    continue
+                comment_split = line.split('#')
+                bi_num = int(comment_split[0].strip(), 2)
+                program.append(bi_num)
         for instruction in program:
             self.ram[address] = instruction
             address += 1
@@ -70,6 +83,7 @@ class CPU:
         while running:
             # lets receive some instructions, and execute them
             command = self.ram[self.pc]
+            print('comand', command)
             # if command is LDI
             if command == 0b10000010:
                 R0 = self.ram[self.pc+1]
@@ -88,3 +102,8 @@ class CPU:
                 running = False
                 self.pc = 0
                 # shutdown
+            else:
+                # if command is non recognizable
+                print(f"Unknown instruction {command}")
+                sys.exit(1)
+        

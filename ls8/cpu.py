@@ -90,10 +90,14 @@ class CPU:
                 num_LDI = self.ram[self.pc+2]
                 self.reg[R0] = num_LDI
                 self.pc += 3
+            # if command is MUL
+            elif command == 0b10100010:
+                num_LDI1 = self.reg[self.ram[self.pc + 1]]
+                num_LDI2 = self.reg[self.ram[self.pc + 2]]
+                print(num_LDI1 * num_LDI2)
+                self.pc += 3
             # if command is PRN
             elif command == 0b01000111:
-                # look at the next line in memory
-                # print the number thats in that spot
                 num_LDI = self.reg[self.ram[self.pc + 1]]
                 print(num_LDI)
                 self.pc += 2

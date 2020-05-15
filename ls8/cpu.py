@@ -10,6 +10,13 @@ class CPU:
         self.reg = [0] * 8  
         self.pc = 0 
         self.ram = [0] * 256  
+        self.SP = 7 # register location that holds top of stack address
+        self.LDI =  int('10000010',2) 
+        self.PRN =  int('01000111',2)
+        self.HLT =  int('00000001',2)
+        self.MUL =  int('10100010',2)
+        self.PUSH =  int('01000101',2)
+        self.POP =  int('01000110',2) 
         
     def load(self):
         """Load a program into memory."""
@@ -80,29 +87,49 @@ class CPU:
     def run(self):
         """Run the CPU."""
         running = True
+        # store the top of memory into Register 7
+        self.reg[self.SP] = len(self.ram) - 1 #255
         while running:
             # lets receive some instructions, and execute them
             command = self.ram[self.pc]
-            print('comand', command)
             # if command is LDI
-            if command == 0b10000010:
-                R0 = self.ram[self.pc+1]
+            if command == self.LDI:
+                Rg = self.ram[self.pc+1]
                 num_LDI = self.ram[self.pc+2]
-                self.reg[R0] = num_LDI
+                self.reg[Rg] = num_LDI
                 self.pc += 3
+            #if comad is push
+            elif command == self.PUSH:
+                Rg = self.ram[self.pc+1]
+                # decrement the Stack Pointer (SP)
+                self.reg[self.SP] -= 1
+                # read the next value for register location
+                Rg_val = self.reg[Rg]
+                # take the value in that register and add to stack
+                self.ram[self.reg[self.SP]] = Rg_val
+                self.pc += 2
+            elif command == self.POP:
+                # POP value of stack at location SP
+                val = self.ram[self.reg[self.SP]]
+                Rg = self.ram[self.pc+1]
+                # store the value into register given
+                self.reg[Rg] = val
+                # increment the Stack Pointer (SP)
+                self.reg[self.SP] += 1
+                self.pc += 2
             # if command is MUL
-            elif command == 0b10100010:
+            elif command == self.MUL:
                 num_LDI1 = self.reg[self.ram[self.pc + 1]]
                 num_LDI2 = self.reg[self.ram[self.pc + 2]]
                 print(num_LDI1 * num_LDI2)
                 self.pc += 3
             # if command is PRN
-            elif command == 0b01000111:
+            elif command == self.PRN:
                 num_LDI = self.reg[self.ram[self.pc + 1]]
                 print(num_LDI)
                 self.pc += 2
             # if command is HLT
-            elif command == 0b00000001:
+            elif command == self.HLT:
                 running = False
                 self.pc = 0
                 # shutdown
